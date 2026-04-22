@@ -11,8 +11,8 @@ const router = createRouter({
       component: HomeView
     },
     {
-      path: '/admin',
-      name: 'admin',
+      path: '/inventario',
+      name: 'inventario',
       component: AdminZapatos
     }
   ]

@@ -15,9 +15,11 @@ const nuevoZapato = ref({
 const tallaInput = ref('');
 const cantidadInput = ref(null);
 const editandoID = ref(null);
+const editando = ref(false);
 
 const prepararEdicion = (zapato) => {
   editandoID.value = zapato.id;
+  editando.value = true;
   
   nuevoZapato.value = { 
     nombre: zapato.nombre,
@@ -33,6 +35,7 @@ const prepararEdicion = (zapato) => {
 
 const cancelarEdicion = () => {
   editandoID.value = null;
+  editando.value = false;
   nuevoZapato.value = { nombre: '', marca: '', precio_venta: null, costo: null, tallas: {}, imagen_url: '' };
 };
 
@@ -69,11 +72,13 @@ const agregarZapato = async () => {
     if (editandoID.value) {
       const docRef = doc(db, "Zapatos", editandoID.value);
       await updateDoc(docRef, nuevoZapato.value);
+      editando.value = false;
       alert("Zapato actualizado correctamente.");
     } else {
       const docRef = await addDoc(collection(db, "Zapatos"), nuevoZapato.value);
       alert("Zapato agregado correctamente. ID: " + docRef.id);
     }
+
     cancelarEdicion();
     obtenerZapatos(); // Recargar lista
     // Resetear formulario
@@ -134,7 +139,7 @@ onMounted(obtenerZapatos);
 
         <label style="grid-column: span 2;">Imagen del Producto (URL):</label>
         <input v-model="nuevoZapato.imagen_url" type="text" placeholder="https://ejemplo.com/zapato.jpg" class="input-estandar" style="grid-column: span 2;" />
-      <button type="submit" class="addZapatoButton" style="grid-column: span 4; font-size: 1rem;">Ingresar Mercancía</button>
+      <button type="submit" :class="{ 'addZapatoButton': !editando, 'updateButton': editando}" style="grid-column: span 4; font-size: 1rem;">{{ editando ? 'Actualizar Producto' : 'Ingresar Mercancía' }}</button>
       <button v-if="editandoID" type="button" @click="cancelarEdicion" class="btn-cancel"> Cancelar</button>  
     </form>
     
@@ -223,7 +228,23 @@ onMounted(obtenerZapatos);
     transform: scale(1.03);
   }
   .register-form .addZapatoButton:active {
-    transform: scale(0.95);
+    transform: scale(1);
+  }
+  .register-form .updateButton {
+    padding: 10px 15px;
+    background-color: #ec981a;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out, transform 0.1s ease-in-out;
+  }
+  .register-form .updateButton:hover {
+    background-color: #df6c00;
+    transform: scale(1.03);
+  }
+  .register-form .updateButton:active {
+    transform: scale(1);
   }
   
   .addTallaButton {
@@ -243,7 +264,7 @@ onMounted(obtenerZapatos);
     transform: scale(1.05);
   }
   .addTallaButton:active {
-    transform: scale(0.95);
+    transform: scale(1);
   }
 
   .listaTallas {

@@ -8,7 +8,7 @@ const cargando = ref(true);
 
 const obtenerZapatos = async () => {
   try {
-    const querySnapshot = await getDocs(collection(db, "zapatos"));
+    const querySnapshot = await getDocs(collection(db, "Zapatos"));
     zapatos.value = querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
@@ -24,59 +24,111 @@ onMounted(obtenerZapatos);
 </script>
 
 <template>
-  <main class="min-h-screen bg-gray-50">
-    <section class="bg-black text-white py-20 px-6 text-center">
-      <h1 class="text-5xl font-extrabold mb-4 italic">STEP UP YOUR GAME</h1>
-      <p class="text-gray-400 text-lg mb-8">La colección más exclusiva de sneakers ahora a tu alcance.</p>
-      <button class="bg-white text-black px-8 py-3 font-bold rounded-full hover:bg-gray-200 transition">
-        Ver Colección
-      </button>
-    </section>
-
-    <section class="max-w-7xl mx-auto py-12 px-6">
-      <div class="flex justify-between items-center mb-8">
-        <h2 class="text-3xl font-bold text-gray-800">Novedades</h2>
-        <span class="text-sm text-gray-500">{{ zapatos.length }} Productos encontrados</span>
+  <main >
+    <section >
+      <div class="catalogoTitle">
+        <h2 >Productos Disponibles</h2>
       </div>
 
-      <div v-if="cargando" class="flex justify-center py-20">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-black"></div>
+      <div v-if="cargando">
+        <div ></div>
       </div>
-
-      <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-        <div v-for="zapato in zapatos" :key="zapato.id" class="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300 relative">
-          
-          <button class="absolute top-4 right-4 z-10 p-2 bg-white/80 backdrop-blur-sm rounded-full text-gray-400 hover:text-red-500 transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-            </svg>
-          </button>
-
-          <div class="h-64 overflow-hidden bg-gray-200">
+      <div v-else class="catalogoDiv">
+        <div v-for="zapato in zapatos" :key="zapato.id" class="productoDiv">
+          <div >
             <img 
-              :src="zapato.imagen || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=600'" 
-              class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-            />
+              :src="zapato.imagen_url || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=600'"/>
           </div>
 
-          <div class="p-4">
-            <div class="flex justify-between items-start mb-1">
-              <h3 class="font-bold text-lg text-gray-900">{{ zapato.nombre }}</h3>
-              <span class="text-blue-600 font-bold">${{ zapato.precio_venta }}</span>
+          <div class="productInfoDiv" >
+            <div >
+              <h3 >{{ zapato.nombre }}</h3>
+              <p >{{ zapato.marca }}</p>
             </div>
-            <p class="text-gray-500 text-sm mb-4">{{ zapato.marca }}</p>
+            <span >${{ zapato.precio_venta }}</span>
             
-            <button class="w-full bg-gray-900 text-white py-2 rounded-lg font-medium hover:bg-black transition-colors">
-              Añadir al carrito
-            </button>
+            
+            <button >Añadir al carrito</button>
           </div>
         </div>
       </div>
 
-      <div v-if="!cargando && zapatos.length === 0" class="text-center py-20">
-        <p class="text-gray-400 italic">No hay zapatos disponibles en el inventario.</p>
-        <RouterLink to="/admin" class="text-blue-500 underline">Ir al panel de Admin para agregar</RouterLink>
+      <div v-if="!cargando && zapatos.length === 0" >
+        <p >No hay zapatos disponibles en el inventario.</p>
+        <RouterLink to="/admin">Ir al panel de Admin para agregar</RouterLink>
       </div>
     </section>
   </main>
 </template>
+
+<style scoped>
+.catalogoTitle {
+  text-align: center;
+  margin-bottom: 20px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.catalogoDiv {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 55px;
+  width: 85%;
+  margin: 0 auto 3rem auto;
+  border-radius: 20px;
+  padding: 40px;
+  background-color: rgb(230, 230, 230);
+}
+
+.productoDiv {
+  background: rgb(255, 255, 255);
+  border-radius: 10px;
+  width: 300px;
+  height: 450px;
+  margin: 20px auto;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.274);
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+.productoDiv img {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+}
+.productInfoDiv {
+  padding: 10px;
+  display: flex;
+  flex-direction:column;
+  justify-content: space-between;
+}
+.productInfoDiv h3 {
+  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  font-size: 1.2rem;
+}
+.productInfoDiv p {
+  font-family: Arial, Helvetica, sans-serif;
+  margin: 0 0;
+  color: #555;
+}
+.productInfoDiv span {
+  font-family: Arial, Helvetica, sans-serif;
+  text-align: right;
+  color: #000000;
+  font-size: 1.5rem;
+  margin-top: 10px;
+}
+.productInfoDiv button {
+  margin-top: 15px;
+  background-color: #42a846;
+  color: white;
+  font-weight: bold;
+  border: none;
+  height: 30px;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: all 0.1s ease-in-out;
+}
+
+</style>
