@@ -9,13 +9,13 @@ const pageData = computed(() => {
     case '/inventario':
       return {
         titulo: 'Inventario',
-        gif: '../public/bannerinventario.png' 
+        gif: '/bannerinventario.png' 
       };
     case '/':
     default:
       return {
         titulo: 'Inicio - Catálogo de Calzado',
-        gif: '../public/bannerhome.png'
+        gif: '/bannerhome.png'
       };
 
   }
