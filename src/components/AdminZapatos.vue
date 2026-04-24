@@ -26,7 +26,7 @@ const prepararEdicion = (zapato) => {
     marca: zapato.marca,
     precio_venta: zapato.precio_venta,
     costo: zapato.costo,
-    tallas: { ...zapato.tallas }, // Copia del objeto de tallas
+    tallas: { ...zapato.tallas },
     imagen_url: zapato.imagen_url || ''
   };
   
@@ -51,7 +51,6 @@ const quitarTallaDelMapa = (talla) => {
   delete nuevoZapato.value.tallas[talla];
 };
 
-// 1. CREATE: Agregar zapato
 const agregarZapato = async () => {
   if (!nuevoZapato.value.nombre || !nuevoZapato.value.marca) {
     alert("Por favor completa los campos de nombre y marca.");
@@ -80,8 +79,8 @@ const agregarZapato = async () => {
     }
 
     cancelarEdicion();
-    obtenerZapatos(); // Recargar lista
-    // Resetear formulario
+    obtenerZapatos(); 
+    
     nuevoZapato.value = { nombre: '', marca: '', precio_venta: null, costo: null, tallas: {}, imagen_url: '' };
   } catch (e) {
     console.error("Error al agregar: ", e);
@@ -89,13 +88,10 @@ const agregarZapato = async () => {
   }
 };
 
-// 2. READ: Obtener lista
 const obtenerZapatos = async () => {
   const querySnapshot = await getDocs(collection(db, "Zapatos"));
   zapatos.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 };
-
-// 3. DELETE: Borrar zapato
 const borrarZapato = async (id) => {
   if(confirm("¿Seguro que quieres eliminarlo?")) {
     await deleteDoc(doc(db, "Zapatos", id));
@@ -198,9 +194,8 @@ onMounted(obtenerZapatos);
     max-width: 35rem;
     margin: 20px auto;
     padding: 20px;
-    background-color: #b3b3b3;
+    background-image: linear-gradient(180deg, #f8f6f6 0%, #c6cedf 100%);
     border-radius: 8px;
-    box-shadow: 0 0px 20px rgba(59, 4, 4, 0.295);
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 15px;

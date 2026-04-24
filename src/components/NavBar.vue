@@ -13,7 +13,7 @@
     justify-content: center;
     align-items: center;
     gap: 2px;
-    background-color: rgb(241, 241, 241);
+    background-color: #dbdfe7;
 }
 .links a {
     color: rgb(0, 0, 0);

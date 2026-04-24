@@ -4,19 +4,18 @@ import { useRoute } from 'vue-router';
 
 const route = useRoute();
 
-// Mapeo de datos por página
 const pageData = computed(() => {
   switch (route.path) {
     case '/inventario':
       return {
         titulo: 'Inventario',
-        gif: 'https://media1.tenor.com/m/wPJ8uBHZ6joAAAAd/homelander-based.gif' // Ejemplo: Libreta/Admin
+        gif: '../public/bannerinventario.png' 
       };
     case '/':
     default:
       return {
         titulo: 'Inicio - Catálogo de Calzado',
-        gif: 'https://media1.tenor.com/m/u0vtZJmUZ_MAAAAd/cat-meme.gif' // Ejemplo: Zapato/Tienda
+        gif: '../public/bannerhome.png'
       };
 
   }
@@ -65,7 +64,7 @@ const pageData = computed(() => {
   transition: all 0.1s ease-in-out;
 }
 .loginButton:hover {
-  background-color: #1e611e;
+  background-color: #0ab833;
   transform: scale(1.05);
   }
 .loginButton:active{
@@ -83,7 +82,7 @@ const pageData = computed(() => {
   transition: all 0.1s ease-in-out;
 }
 .registerButton:hover {
-  background-color: #114aa0;
+  background-color: #48aaeb;
   transform: scale(1.05);
   }
 .registerButton:active{
@@ -100,7 +99,7 @@ const pageData = computed(() => {
 }
 
 .overlay {
-  background: rgba(0, 0, 0, 0.548); /* Oscurecer para leer texto */
+  background: rgba(0, 0, 0, 0); 
   color: white;
   font-family: Arial, Helvetica, sans-serif;
   font-size: 1.2rem;

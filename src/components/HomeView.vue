@@ -1,10 +1,103 @@
 <script setup>
 import { ref, onMounted } from 'vue';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, updateDoc, increment, doc } from 'firebase/firestore';
 import { db } from '../firebase';
+
+const carrito = ref([]);
+const mostrarCarrito = ref(false);
+const zapatoSeleccionado = ref(null);
+const tallaElegida = ref('');
 
 const zapatos = ref([]);
 const cargando = ref(true);
+
+const generarRecibo = () => {
+  const productosHTML = carrito.value.map(item => `
+    <tr>
+      <td>${item.nombre} (Talla: ${item.talla})</td>
+      <td>$${item.precio}</td>
+    </tr>
+  `).join('');
+  const total = carrito.value.reduce((sum, item) => sum + item.precio, 0);
+  const ventanaPuntual = window.open('', '_blank');
+  ventanaPuntual.document.write(`
+    <html>
+      <head>
+        <title>Recibo de Compra - SHRUD</title>
+        <style>
+          body { font-family: sans-serif; padding: 40px; text-align: center; }
+          table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+          th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+          .total { font-size: 1.5rem; font-weight: bold; margin-top: 20px; }
+          .footer { margin-top: 50px; font-size: 0.8rem; color: #777; }
+        </style>
+      </head>
+      <body>
+        <h1>SHRUD</h1>
+        <p>Comprobante de Pago</p>
+        <hr>
+        <table>
+          <thead><tr><th>Producto</th><th>Precio</th></tr></thead>
+          <tbody>${productosHTML}</tbody>
+        </table>
+        <div class="total">Total: $${total}</div>
+        <p class="footer">Gracias por su compra. Fecha: ${new Date().toLocaleDateString()}</p>
+      </body>
+    </html>
+  `);
+
+  ventanaPuntual.document.close();
+  ventanaPuntual.print(); // Lanza el diálogo de impresión
+};
+
+const prepararCarrito = (zapato) => {
+  zapatoSeleccionado.value = zapato;
+  tallaElegida.value = '';
+  mostrarCarrito.value = true;
+};
+
+const anadiralCarrito = () => {
+  if (!tallaElegida.value) {
+    alert('Por favor, selecciona una talla antes de añadir al carrito.');
+    return;
+  }
+
+  carrito.value.push({
+    id: zapatoSeleccionado.value.id,
+    nombre: zapatoSeleccionado.value.nombre,
+    marca: zapatoSeleccionado.value.marca,
+    precio: zapatoSeleccionado.value.precio_venta,
+    talla: tallaElegida.value,
+    imagen_url: zapatoSeleccionado.value.imagen_url
+  });
+
+  mostrarCarrito.value = false;
+  alert('Producto añadido al carrito');
+};
+
+const vaciarCarrito = () => {
+  if (confirm('¿Estás seguro de que quieres vaciar el carrito?')) {
+    carrito.value = [];
+  }
+};
+const procesarCompra = async () => {
+  try {
+      for (const item of carrito.value) {
+      const docRef = doc(db, "Zapatos", item.id);
+      await updateDoc(docRef, {
+        [`tallas.${item.talla}`]: increment(-1)
+      });
+  }
+  alert('Compra procesada con éxito');
+  generarRecibo();
+  obtenerZapatos();
+  carrito.value = [];
+  } catch (error) {
+    console.error("Error procesando compra:", error);
+    alert('Hubo un error al procesar la compra. Por favor, intenta de nuevo.'); 
+  }
+  
+};
 
 const obtenerZapatos = async () => {
   try {
@@ -48,7 +141,7 @@ onMounted(obtenerZapatos);
             <span >${{ zapato.precio_venta }}</span>
             
             
-            <button >Añadir al carrito</button>
+            <button @click="prepararCarrito(zapato)">Añadir al carrito</button>
           </div>
         </div>
       </div>
@@ -59,6 +152,45 @@ onMounted(obtenerZapatos);
       </div>
     </section>
   </main>
+
+
+  <div v-if="mostrarCarrito" class="modal-overlay">
+    <div class="modal-content">
+      <h2>{{ zapatoSeleccionado.nombre }}</h2>
+      <p>Selecciona tu talla:</p>
+      
+      <div class="tallas-grid">
+        <button class="tallas"
+          v-for="(stock, talla) in zapatoSeleccionado.tallas" 
+          :key="talla"
+          @click="tallaElegida = talla"
+          :class="{ 'talla-activa': tallaElegida === talla }"
+          v-show="stock > 0"
+        >
+          {{ talla }} ({{ stock }} disp.)
+        </button>
+      </div>
+
+      <div class="modal-acciones">
+        <button @click="mostrarCarrito = false" class="btn-cancelar">Cancelar</button>
+        <button @click="anadiralCarrito" class="btn-confirmar">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <div v-if="carrito.length > 0" class="resumen-carrito">
+    <h3>Tu Carrito ({{ carrito.length }})</h3>
+      <ul>
+        <li v-for="(item, index) in carrito" :key="index">
+          {{ item.nombre }} - Talla: {{ item.talla }} - ${{ item.precio }}
+        </li>
+      </ul>
+      <div class="carrito-acciones">
+        <button @click="vaciarCarrito" class="btn-vaciar">Vaciar Carrito</button>
+        <button @click="procesarCompra" class="btn-pagar">Pagar</button>
+      </div>
+    
+  </div>  
 </template>
 
 <style scoped>
@@ -76,7 +208,7 @@ onMounted(obtenerZapatos);
   margin: 0 auto 3rem auto;
   border-radius: 20px;
   padding: 40px;
-  background-color: rgb(230, 230, 230);
+  background-image: linear-gradient(180deg, #ffffff 0%, #dbdfe7 50%);
 }
 
 .productoDiv {
@@ -123,12 +255,157 @@ onMounted(obtenerZapatos);
   margin-top: 15px;
   background-color: #42a846;
   color: white;
+  font-size: 1rem;
   font-weight: bold;
+  border-radius: 7px;
   border: none;
   height: 30px;
   padding: 5px 10px;
   cursor: pointer;
   transition: all 0.1s ease-in-out;
 }
+.productInfoDiv button:hover {
+  background-color: #0ab833;
+  transform: scale(1.03);
+}
+.productInfoDiv button:active{
+  transform: scale(1);
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(3px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: rgba(255, 255, 255, 0.774);
+  font-family: Arial, Helvetica, sans-serif;
+  padding: 30px;
+  border-radius: 15px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+}
+
+.tallas-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 20px 0;
+}
+.tallas {
+  background: #f0f0f0;
+  border: 3px solid #f0f0f0;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: border 0.2s ease-in-out;
+}
+.tallas:hover {
+  border: #000 solid 3px;
+}
+.talla-activa {
+  background: transparent;
+  background-color: #000 !important;
+  color: white;
+}
+
+.modal-acciones {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 20px;
+}
+.btn-cancelar {
+  background: #ffffff;
+  font-weight: bold;
+  color: rgb(182, 0, 0);
+  border: 2px solid rgb(182, 0, 0);
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.1s ease-in-out;
+}
+.btn-cancelar:hover {
+  background-color: rgb(182, 0, 0);
+  color: white;
+}
+.btn-confirmar {
+  background: #28a745;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.1s ease-in-out;
+}
+.btn-confirmar:hover {
+  background-color: #0ab833;
+  transform: scale(1.05);
+}
+.btn-confirmar:active{
+  transform: scale(1);
+}
+
+.resumen-carrito {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  font-family: Arial, Helvetica, sans-serif;
+  background-image: linear-gradient(180deg, #a5b0ce00 0%, #ffffff 50%);
+  color: rgb(0, 0, 0);
+  backdrop-filter: blur(3px);
+  padding: 20px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.329);
+  border-radius: 10px;
+}
+.resumen-carrito h3 {
+  margin: 0 0 10px 0;
+}
+.resumen-carrito ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 15px 0;
+}
+.carrito-acciones {
+  display: flex;
+  justify-content: space-between;
+}
+.resumen-carrito .btn-vaciar {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.1s ease-in-out;
+}
+.resumen-carrito .btn-vaciar:hover {
+  background-color: #c82333;
+  transform: scale(1.05);
+}
+.resumen-carrito .btn-pagar {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.1s ease-in-out;
+}
+.resumen-carrito .btn-pagar:hover {
+  background-color: #218838;
+  transform: scale(1.05);
+}
+
 
 </style>
