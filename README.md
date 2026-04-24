@@ -1,23 +1,14 @@
-# ZapateriaCRUD
+# ZapateriaCRUD (SHRUD)
+CRUD for an hipotetic Shoe Store, using Vue, Firebase and some other tecnologies.
+Project Made in 1 week, working like 2 or 3 hours per day during my free time from job and College.
 
-This template should help get you started developing with Vue 3 in Vite.
+## Features
+Two Routes, 'Inicio' and 'Inventario' acts like the exhibition of different sneakers models and the inventory management individually, in the future, the idea is that normal users or page visitors can just be able to see Inicio and Admins would be able yo manage the inventory in the other page.
 
-## Recommended IDE Setup
+## Tecnologies
+Firebase for Cloud Database, simple and fast, ideal for this tiny project.
+Vue & Vite, recommended by my interviewer to use in this project, I liked the components feature, working with html, css and js in the same .vue file is very convenient.
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
-
-## Recommended Browser Setup
-
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
 
 ## Project Setup
 
